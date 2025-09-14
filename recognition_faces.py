@@ -5,13 +5,12 @@ import os
 import pandas as pd
 from datetime import datetime
 
-# Paths
+ 
 ENCODINGS_PATH = "encodings.npy"
 NAMES_PATH = "names.npy"
 ATTENDANCE_FILE = "attendance.csv"
 SNAPSHOT_FOLDER = "snapshots"
-
-# Load known faces
+ 
 if not os.path.exists(ENCODINGS_PATH) or not os.path.exists(NAMES_PATH):
     print("[ERROR] No encodings found. Run encode_faces.py first!")
     exit()
@@ -21,18 +20,17 @@ known_names = np.load(NAMES_PATH, allow_pickle=True)
 
 print(f"[INFO] Loaded {len(known_encodings)} face encodings.")
 
-# Ensure snapshot folder exists
+ 
 os.makedirs(SNAPSHOT_FOLDER, exist_ok=True)
-
-# Create attendance file if missing
+ 
 if not os.path.exists(ATTENDANCE_FILE):
     df = pd.DataFrame(columns=["Name", "Time", "Image"])
     df.to_csv(ATTENDANCE_FILE, index=False)
 
-# Load existing attendance
+ 
 attendance = pd.read_csv(ATTENDANCE_FILE)
 
-# Start webcam
+ 
 cap = cv2.VideoCapture(0)
 print("Press 'q' to quit. Recognized people will be marked in attendance.csv")
 
@@ -54,24 +52,23 @@ while True:
             best_match = np.argmin(face_recognition.face_distance(known_encodings, face_encoding))
             name = known_names[best_match]
 
-            # Save attendance only if new
+           
             if name not in attendance["Name"].values:
                 now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-                # Save snapshot
+               
                 top, right, bottom, left = face_location
                 face_img = frame[top:bottom, left:right]
                 img_path = os.path.join(SNAPSHOT_FOLDER, f"{name}_{now.replace(':', '-')}.jpg")
                 cv2.imwrite(img_path, face_img)
-
-                # Update attendance
+ 
                 new_entry = {"Name": name, "Time": now, "Image": img_path}
                 attendance = pd.concat([attendance, pd.DataFrame([new_entry])], ignore_index=True)
                 attendance.to_csv(ATTENDANCE_FILE, index=False)
 
                 print(f"[INFO] Attendance marked for {name}")
 
-        # Draw box and label
+       
         top, right, bottom, left = face_location
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
         cv2.putText(frame, name, (left, top - 10),

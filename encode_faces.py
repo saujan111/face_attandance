@@ -33,8 +33,7 @@ for person in os.listdir(DATASET_DIR):
             known_names.append(person)
 
 print(f"[INFO] Encoded {len(known_encodings)} faces.")
-
-# Save encodings and names
+ 
 np.save(ENCODINGS_PATH, known_encodings)
 np.save(NAMES_PATH, known_names)
 
